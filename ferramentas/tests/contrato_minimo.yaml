@@ -1,0 +1,188 @@
+# Contrato mínimo usado nos testes automatizados. Dados fictícios.
+contrato: fiscalizacao-teste
+versao: "1.0"
+titulo: Fiscalização de estabelecimentos (teste)
+descricao: >
+  Contrato fictício e reduzido para testar as ferramentas: dois blocos, com enum,
+  referência, data de evento, obrigatoriedade condicional e uma regra de cada tipo.
+orgao: AGENCIA_FICTICIA
+regulados: [REGULADO_A, REGULADO_B]
+
+base_normativa:
+  - id: RES-001-2020
+    descricao: Resolução fictícia nº 1/2020
+    url: https://normas.exemplo.invalid/res-1-2020
+
+teste_auditoria:
+  pergunta: >
+    Todo estabelecimento ativo foi fiscalizado e as autuações têm multa registrada?
+  regra: |
+    SE o estabelecimento está ATIVO E não tem fiscalização
+      ENTÃO NAO_CONFORME
+    SENÃO CONFORME
+  classificacao: computavel
+  saidas: [CONFORME, NAO_CONFORME, PRECISA_DE_DELIBERACAO]
+  lacunas:
+    - id: L1
+      trecho: "fiscalizado"
+      problema: a norma não diz se fiscalização remota conta
+      decisao_padrao: conta
+      quem_decide: Diretoria
+
+periodicidade:
+  carga_inicial: "histórico desde 2020-01-01"
+  regular: mensal
+  prazo_entrega: "até o dia 10 do mês seguinte"
+
+cabecalho:
+  - nome: responsavel_envio
+    tipo: texto
+    obrigatorio: true
+    descricao: Nome de quem responde pelo envio.
+    origem: regulado
+    exemplo: "Pessoa Fictícia"
+
+blocos:
+  - nome: estabelecimentos
+    descricao: Um registro por estabelecimento.
+    chave: [id_estabelecimento]
+    campos:
+      - nome: id_estabelecimento
+        tipo: texto
+        obrigatorio: true
+        descricao: Identificador do estabelecimento.
+        origem: cadastro do regulado
+        exemplo: "EST-0001"
+        tamanho_max: 20
+        formato: "^EST-[0-9]{4}$"
+      - nome: cnpj
+        tipo: cnpj
+        obrigatorio: true
+        descricao: CNPJ do estabelecimento.
+        origem: cadastro do regulado
+        exemplo: "11222333000181"
+      - nome: codigo_ibge_municipio
+        tipo: ibge_municipio
+        obrigatorio: false
+        descricao: Município.
+        origem: cadastro do regulado
+        exemplo: "3304557"
+      - nome: situacao
+        tipo: enum
+        obrigatorio: true
+        dominio: [ATIVO, BAIXADO]
+        descricao: Situação cadastral.
+        origem: cadastro do regulado
+        exemplo: ATIVO
+      - nome: data_abertura
+        tipo: data
+        obrigatorio: true
+        evento: true
+        descricao: Data de abertura.
+        origem: cadastro do regulado
+        exemplo: 2021-05-10
+      - nome: motivo_baixa
+        tipo: texto
+        obrigatorio:
+          se: situacao
+          igual: BAIXADO
+        descricao: Motivo da baixa.
+        origem: cadastro do regulado
+        exemplo: "encerramento das atividades"
+      - nome: cpf_responsavel
+        tipo: cpf
+        obrigatorio: false
+        descricao: CPF do responsável técnico.
+        origem: cadastro do regulado
+        exemplo: "52998224725"
+
+  - nome: fiscalizacoes
+    descricao: Um registro por fiscalização realizada.
+    chave: [id_fiscalizacao]
+    campos:
+      - nome: id_fiscalizacao
+        tipo: texto
+        obrigatorio: true
+        descricao: Identificador da fiscalização.
+        origem: sistema de fiscalização
+        exemplo: "FIS-2025-001"
+      - nome: id_estabelecimento
+        tipo: texto
+        obrigatorio: true
+        referencia: estabelecimentos.id_estabelecimento
+        descricao: Estabelecimento fiscalizado.
+        origem: sistema de fiscalização
+        exemplo: "EST-0001"
+      - nome: data_fiscalizacao
+        tipo: data
+        obrigatorio: true
+        evento: true
+        descricao: Data da fiscalização.
+        origem: sistema de fiscalização
+        exemplo: 2025-03-10
+      - nome: data_relatorio
+        tipo: data
+        obrigatorio: false
+        evento: true
+        descricao: Data do relatório.
+        origem: sistema de fiscalização
+        exemplo: 2025-03-20
+      - nome: resultado
+        tipo: enum
+        obrigatorio: true
+        dominio: [REGULAR, AUTUADO]
+        descricao: Resultado da fiscalização.
+        origem: sistema de fiscalização
+        exemplo: AUTUADO
+      - nome: valor_multa
+        tipo: decimal
+        obrigatorio:
+          se: resultado
+          igual: AUTUADO
+        minimo: 0
+        descricao: Valor da multa, em reais.
+        origem: sistema de fiscalização
+        exemplo: 1500.5
+      - nome: prazo_dias
+        tipo: inteiro
+        obrigatorio: false
+        minimo: 1
+        maximo: 365
+        descricao: Prazo para correção, em dias.
+        origem: sistema de fiscalização
+        exemplo: 30
+      - nome: reincidente
+        tipo: booleano
+        obrigatorio: false
+        descricao: Se o estabelecimento é reincidente.
+        origem: sistema de fiscalização
+        exemplo: false
+
+regras:
+  - id: R06
+    tipo: ordem_datas
+    severidade: rejeicao
+    bloco: fiscalizacoes
+    antes: data_fiscalizacao
+    depois: data_relatorio
+    mensagem: "data_relatorio deve ser igual ou posterior a data_fiscalizacao"
+  - id: A01
+    tipo: data_minima
+    severidade: alerta
+    bloco: fiscalizacoes
+    campo: data_fiscalizacao
+    valor: "2020-01-01"
+    mensagem: "fiscalização anterior à vigência da resolução"
+  - id: R09
+    tipo: condicional
+    severidade: rejeicao
+    bloco: fiscalizacoes
+    se: {campo: resultado, igual: AUTUADO}
+    entao: {campo: prazo_dias, preenchido: true}
+    mensagem: "fiscalização com autuação deve informar prazo_dias"
+  - id: A02
+    tipo: expressao
+    severidade: alerta
+    bloco: estabelecimentos
+    condicao: "r['situacao'] != 'ATIVO' or any(f.get('id_estabelecimento') == r['id_estabelecimento'] for f in e['fiscalizacoes'])"
+    mensagem: "estabelecimento ativo sem fiscalização registrada"

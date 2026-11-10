@@ -1,0 +1,596 @@
+# Contrato de coleta — Inspeção Periódica de Gás (IPG), layout 1.0
+# Formato: docs/formato-contrato.md (versão 1)
+# Caso-exemplo do repositório: autovistoria quinquenal das instalações de gás
+# canalizado no Estado do Rio de Janeiro. Ver README.md desta pasta.
+
+contrato: ipg-envio
+versao: "1.0"
+titulo: Inspeção Periódica de Gás
+descricao: >
+  Dados que a CEG e a CEG RIO enviam à AGENERSA para que a agência verifique,
+  de forma automática e contínua, o cumprimento da inspeção quinquenal de
+  segurança das instalações internas de gás canalizado: o universo de unidades
+  consumidoras, os laudos de autovistoria recebidos desde 21/03/2015, as
+  interrupções de fornecimento ligadas à inspeção e o cadastro de inspetoras
+  credenciadas pelas concessionárias. Os três canais (API, planilha Excel e
+  arquivo JSON) carregam exatamente estes campos, com estes nomes e domínios.
+orgao: AGENERSA
+regulados: [CEG, CEG_RIO]
+
+base_normativa:
+  - id: LEI-6890-2014
+    descricao: >
+      Lei Estadual RJ nº 6.890/2014 — obrigatoriedade da inspeção quinquenal de
+      segurança das instalações de gás canalizado (vigência: 21/03/2015).
+  - id: IN-AGENERSA-48-2015
+    descricao: >
+      IN AGENERSA nº 48/2015 — Regulamento e Manual da rede de distribuição
+      interna; arts. 2º e 3º (OIA acreditado pelo Inmetro) e item 4.1.20
+      (interrupção em até 15 dias úteis). Não foi revogada pela IN 113/2024.
+  - id: IN-AGENERSA-113-2024
+    descricao: >
+      IN AGENERSA nº 113/2024 (DOERJ 16/01/2024) — credenciamento pelas
+      concessionárias (art. 2º), vistoria prévia (art. 4º), interrupção (art. 7º)
+      e cronograma da primeira inspeção (art. 8º e Anexo I). Revogou as INs
+      47/2015 e 73/2018. Texto consolidado com as alterações abaixo.
+    url: https://www.rj.gov.br/agenersa/sites/default/files/arquivos_paginas_basicas/IN113_0.pdf
+  - id: IN-AGENERSA-136-2025
+    descricao: >
+      IN AGENERSA nº 136/2025 (DOERJ 18/09/2025) — altera o cronograma do Anexo I
+      da IN 113/2024 (prazos vencidos ou a vencer até 31/12/2025 passam a 30/06/2026).
+  - id: IN-AGENERSA-149-2026
+    descricao: >
+      IN AGENERSA nº 149/2026 (DOERJ 08/07/2026) — prazos com vencimento em
+      30/06/2026 passam a 23/09/2026.
+  - id: ABNT-NBR-15923
+    descricao: >
+      ABNT NBR 15923 — inspeção de rede de distribuição interna de gases
+      combustíveis em instalações residenciais (prazo para irregularidade sanável).
+  - id: ABNT-NBR-13103
+    descricao: ABNT NBR 13103 — instalação de aparelhos a gás (teste de monóxido de carbono).
+
+teste_auditoria:
+  pergunta: >
+    A unidade residencial ou comercial com fornecimento ativo de gás canalizado
+    da CEG ou da CEG RIO tem inspeção de segurança válida dentro do prazo e, se a
+    última inspeção a reprovou, a concessionária interrompeu o fornecimento no
+    prazo regulamentar?
+  regra: |
+    SE a unidade não é residencial nem comercial, ou não tem fornecimento ativo (L9)
+      ENTÃO fora do escopo.
+    Inspeção válida = realizada entre 21/03/2015 e a data de referência, por quem,
+      NA DATA DA INSPEÇÃO, estava acreditado pelo Inmetro como OIA-IG (L1, L2, L10)
+      ou credenciado pela concessionária da unidade (L3), com registro em dia no
+      CREA, no CAU ou no CRT a partir de 16/01/2024 (IN 113, art. 2º, IV).
+    Data-limite =
+      última inspeção válida + 5 anos (L4, L7); OU, se não houver,
+      vistoria prévia da concessionária + 5 anos (L5); OU, se não houver,
+      data-fim do cronograma da localidade (Anexo I da IN 113, alterado pelas
+      INs 136/2025 e 149/2026) (L6); OU, fora do Anexo, 22/03/2026 (art. 8º).
+    SE a data de referência passou da data-limite
+      ENTÃO NÃO CONFORME (inspeção vencida ou primeira inspeção não realizada).
+    SENÃO SE a última inspeção válida reprovou a instalação, ou o prazo de
+      adequação de um laudo aprovado com restrição venceu sem nova inspeção,
+      E o fornecimento não foi interrompido no prazo (imediato se houve
+      escapamento de gás; senão, 15 dias úteis) (L8, L11)
+      ENTÃO NÃO CONFORME (obrigação da concessionária).
+    SENÃO SE o resultado depende de uma lacuna ainda não decidida pela AGENERSA
+      ENTÃO PRECISA DE DELIBERAÇÃO.
+    SENÃO CONFORME.
+  classificacao: parcialmente_computavel
+  saidas: [CONFORME, NAO_CONFORME, PRECISA_DE_DELIBERACAO]
+  lacunas:
+    - id: L1
+      trecho: "OIA acreditado pelo Inmetro (IN 48/2015, arts. 2º e 3º) × quem 'estava acreditado' (IN 113/2024, art. 2º, IV)"
+      problema: >
+        A IN 48/2015 não foi revogada e a Cgcre segue acreditando OIA-IG com
+        escopo que cita a IN 113. Pela leitura literal da IN 113, só fica
+        dispensado de credenciamento quem já estava acreditado em janeiro de
+        2024. Não está decidido se um OIA acreditado depois disso, e não
+        credenciado pela concessionária, faz inspeção válida.
+      decisao_padrao: aceita (parâmetro oia_inmetro_apos_in113 = "todos")
+      quem_decide: Conselho Diretor (deliberação interpretativa)
+    - id: L2
+      trecho: "órgãos competentes conveniados (IN 47/2015)"
+      problema: >
+        De 21/03/2015 a 31/05/2015 só havia a IN 47/2015, que não nomeia o órgão
+        que habilita as inspetoras.
+      decisao_padrao: exige OIA acreditado pelo Inmetro também nesse período
+      quem_decide: Conselho Diretor (impacto residual)
+    - id: L3
+      trecho: "credenciamento pelas concessionárias (IN 113/2024, art. 2º, I)"
+      problema: >
+        Não está dito se a inspetora credenciada pela CEG pode inspecionar
+        unidade da CEG RIO, e vice-versa.
+      decisao_padrao: não vale para a outra concessionária
+      quem_decide: Conselho Diretor, ouvidas as concessionárias
+    - id: L4
+      trecho: "inspeção quinquenal (Lei 6.890/2014, art. 1º)"
+      problema: >
+        A norma não diz como contar os 5 anos (data de aniversário, 5 × 365,25
+        dias ou fim do mês) nem se há tolerância.
+      decisao_padrao: data de aniversário, sem tolerância (29/02 passa a 28/02)
+      quem_decide: Câmara de Energia (CAENE)
+    - id: L5
+      trecho: "vistoria prévia da concessionária (IN 113/2024, art. 4º)"
+      problema: >
+        A IN 47/2015 tratava a vistoria prévia da ligação nova como termo
+        inicial da contagem; a IN 113/2024 não diz nada.
+      decisao_padrao: a vistoria prévia inicia a contagem de 5 anos
+      quem_decide: Conselho Diretor
+    - id: L6
+      trecho: "cronograma da primeira inspeção (Anexo I da IN 113, alterado pelas INs 136/2025 e 149/2026)"
+      problema: >
+        Em 49 localidades, a regra do art. 1º da IN 136/2025 dá uma data-fim e
+        a tabela republicada no Anexo da mesma IN dá outra (ex.: Madureira,
+        22/03/2026 × 23/09/2026). Há ainda 3 localidades no Anexo da IN 136 que
+        não constam do Anexo I original.
+      decisao_padrao: vale a tabela publicada (parâmetro cronograma_prevalece = "tabela")
+      quem_decide: Conselho Diretor (errata ou consolidação)
+    - id: L7
+      trecho: "passar por inspeção (Lei 6.890/2014, arts. 1º a 4º)"
+      problema: >
+        Não está dito se a inspeção que reprovou a instalação cumpre a
+        periodicidade ou se só a aprovada conta.
+      decisao_padrao: qualquer resultado conta; a reprovação gera outra obrigação
+      quem_decide: Conselho Diretor
+    - id: L8
+      trecho: "interromper imediatamente (Lei, art. 4º) × avaliar a necessidade (IN 113, art. 7º)"
+      problema: >
+        A lei manda interromper o fornecimento após a reprovação; a IN 113
+        manda a concessionária avaliar a necessidade de interromper.
+      decisao_padrao: interrupção obrigatória (hierarquia da lei)
+      quem_decide: Procuradoria
+    - id: L9
+      trecho: "instalações internas de gás canalizado (Lei, art. 1º, §2º)"
+      problema: >
+        Não está dito se a unidade com fornecimento suspenso ou desligado
+        continua obrigada, nem como tratar áreas comuns e prumadas.
+      decisao_padrao: unidade sem fornecimento ativo fica fora do escopo
+      quem_decide: Conselho Diretor
+    - id: L10
+      trecho: "acreditado pelo Inmetro na data da inspeção"
+      problema: >
+        A consulta pública da Cgcre mostra só a situação atual de cada
+        organismo, sem o histórico de suspensões já encerradas.
+      decisao_padrao: >
+        considera acreditado da data de concessão até a data de suspensão ou
+        cancelamento, se houver
+      quem_decide: AGENERSA, por ofício à Cgcre/Inmetro
+    - id: L11
+      trecho: "15 dias úteis do recebimento do laudo (IN 48/2015, item 4.1.20)"
+      problema: >
+        O prazo conta do recebimento do laudo pela concessionária, data que não
+        estava no cadastro mínimo; os feriados também não são considerados.
+      decisao_padrao: >
+        conta da data da inspeção, sem feriados; este contrato passa a exigir
+        data_recebimento_laudo
+      quem_decide: Câmara de Energia (CAENE)
+    - id: L12
+      trecho: "lei estadual publicada no DOERJ de 02/07/2026 (a confirmar)"
+      problema: >
+        Notícias indicam lei nova que amplia quem pode inspecionar (engenheiros,
+        arquitetos e técnicos com registro e capacitação de 24 h). Número e
+        texto não localizados.
+      decisao_padrao: não incorporada
+      quem_decide: AGENERSA, após confirmação no DOERJ
+    - id: L13
+      trecho: "RIP (Decreto 23.317/97) ou ABNT, conforme a base do habite-se (IN 113, art. 1º)"
+      problema: >
+        O critério técnico afeta o conteúdo do laudo, não a periodicidade. A
+        qualidade técnica e a autenticidade do laudo pedem amostragem e
+        fiscalização em campo.
+      decisao_padrao: fora do teste automatizado; o campo criterio_tecnico é coletado
+      quem_decide: não se aplica
+
+periodicidade:
+  carga_inicial: "COMPLETA, com todo o histórico desde 2015-03-21, em até 60 dias da notificação"
+  regular: mensal
+  prazo_entrega: "até o dia 10 do mês seguinte; data_referencia = último dia do mês; envio rejeitado deve ser reenviado em até 5 dias úteis"
+
+cabecalho:
+  - nome: responsavel_envio
+    tipo: texto
+    obrigatorio: true
+    descricao: nome e e-mail do responsável técnico pelo envio
+    exemplo: "Fulana Exemplo <fulana@concessionaria.example>"
+
+blocos:
+  - nome: unidades
+    descricao: >
+      Uma linha por unidade consumidora residencial ou comercial atendida por
+      gás canalizado, inclusive as suspensas e desligadas (a AGENERSA decide o
+      escopo; a concessionária não filtra).
+    chave: [id_unidade]
+    campos:
+      - nome: id_unidade
+        tipo: texto
+        obrigatorio: true
+        descricao: código da instalação ou do cliente no sistema comercial da concessionária
+        origem: cadastro comercial da concessionária
+        exemplo: "1000234567"
+        tamanho_max: 30
+      - nome: classe
+        tipo: enum
+        obrigatorio: true
+        descricao: classe de consumo
+        dominio: [RESIDENCIAL, COMERCIAL, INDUSTRIAL, OUTRA]
+        origem: cadastro comercial da concessionária
+        exemplo: RESIDENCIAL
+      - nome: situacao_fornecimento
+        tipo: enum
+        obrigatorio: true
+        descricao: situação do fornecimento na data de referência
+        dominio: [ATIVO, SUSPENSO, DESLIGADO]
+        origem: cadastro comercial / faturamento da concessionária
+        exemplo: ATIVO
+      - nome: data_situacao
+        tipo: data
+        obrigatorio: false
+        descricao: desde quando a unidade está na situação atual
+        origem: cadastro comercial / faturamento da concessionária
+        exemplo: "2012-04-10"
+        evento: true
+      - nome: logradouro
+        tipo: texto
+        obrigatorio: true
+        descricao: logradouro da unidade
+        origem: cadastro comercial da concessionária
+        exemplo: Rua Conde de Bonfim
+      - nome: numero
+        tipo: texto
+        obrigatorio: true
+        descricao: número no logradouro; SN se não houver
+        origem: cadastro comercial da concessionária
+        exemplo: "500"
+      - nome: complemento
+        tipo: texto
+        obrigatorio: false
+        descricao: apartamento, loja, bloco
+        origem: cadastro comercial da concessionária
+        exemplo: Apto 301
+      - nome: bairro
+        tipo: texto
+        obrigatorio: true
+        descricao: nome do bairro como no cadastro (define o prazo da primeira inspeção no cronograma)
+        origem: cadastro comercial da concessionária
+        exemplo: Tijuca
+      - nome: municipio
+        tipo: texto
+        obrigatorio: true
+        descricao: nome do município
+        origem: cadastro comercial da concessionária
+        exemplo: Rio de Janeiro
+      - nome: codigo_ibge_municipio
+        tipo: ibge_municipio
+        obrigatorio: true
+        descricao: código IBGE do município, 7 dígitos
+        origem: cadastro comercial da concessionária (tabela do IBGE)
+        exemplo: "3304557"
+      - nome: cep
+        tipo: cep
+        obrigatorio: true
+        descricao: CEP da unidade, 8 dígitos
+        origem: cadastro comercial da concessionária
+        exemplo: "20520054"
+      - nome: id_edificacao
+        tipo: texto
+        obrigatorio: false
+        descricao: código do prédio ou condomínio, para agrupar unidades da mesma prumada
+        origem: cadastro técnico da concessionária
+        exemplo: ED-0045123
+      - nome: data_inicio_fornecimento
+        tipo: data
+        obrigatorio: true
+        descricao: data da ligação
+        origem: cadastro comercial da concessionária
+        exemplo: "2012-04-10"
+        evento: true
+      - nome: data_vistoria_previa
+        tipo: data
+        obrigatorio: false
+        descricao: vistoria prévia feita pela concessionária antes de iniciar o fornecimento (IN 113, art. 4º; lacuna L5)
+        origem: ordens de serviço de ligação da concessionária
+        exemplo: "2012-04-03"
+        evento: true
+
+  - nome: inspecoes
+    descricao: >
+      Uma linha por laudo de autovistoria recebido pela concessionária desde
+      2015-03-21, de qualquer resultado (IN 113, art. 2º, XI).
+    chave: [id_inspecao]
+    campos:
+      - nome: id_inspecao
+        tipo: texto
+        obrigatorio: true
+        descricao: número do laudo ou identificador do registro
+        origem: registro de laudos da concessionária (IN 113, art. 2º, XI)
+        exemplo: LAU-2024-001873
+      - nome: id_unidade
+        tipo: texto
+        obrigatorio: true
+        descricao: unidade inspecionada
+        origem: registro de laudos da concessionária
+        exemplo: "1000234567"
+        referencia: unidades.id_unidade
+      - nome: data_inspecao
+        tipo: data
+        obrigatorio: true
+        descricao: data em que a inspeção foi realizada
+        origem: laudo de autovistoria (inspetora)
+        exemplo: "2024-03-15"
+        evento: true
+      - nome: data_recebimento_laudo
+        tipo: data
+        obrigatorio: true
+        descricao: data em que a concessionária recebeu o laudo (lacuna L11)
+        origem: registro de laudos da concessionária
+        exemplo: "2024-03-20"
+        evento: true
+      - nome: documento_inspetora
+        tipo: cpf_cnpj
+        obrigatorio: true
+        descricao: CNPJ (14) ou CPF (11) de quem executou a inspeção
+        origem: laudo de autovistoria (inspetora)
+        exemplo: "44555666000181"
+      - nome: nome_inspetora
+        tipo: texto
+        obrigatorio: true
+        descricao: razão social ou nome de quem executou a inspeção
+        origem: laudo de autovistoria (inspetora)
+        exemplo: INSPETORA EXEMPLO ALFA LTDA.
+      - nome: numero_acreditacao_inmetro
+        tipo: texto
+        obrigatorio: false
+        descricao: número da acreditação na Cgcre/Inmetro, se a inspetora for organismo acreditado
+        origem: laudo de autovistoria (inspetora); conferido na lista OIA-IG da Cgcre
+        exemplo: OIA-IG-9001
+      - nome: responsavel_tecnico_nome
+        tipo: texto
+        obrigatorio: true
+        descricao: profissional que assinou o laudo
+        origem: laudo de autovistoria (inspetora)
+        exemplo: Carlos Exemplo Moreira
+      - nome: responsavel_tecnico_conselho
+        tipo: enum
+        obrigatorio: true
+        descricao: conselho profissional do responsável técnico (IN 113, art. 2º, IV)
+        dominio: [CREA, CAU, CRT]
+        origem: laudo de autovistoria (inspetora)
+        exemplo: CREA
+      - nome: responsavel_tecnico_registro
+        tipo: texto
+        obrigatorio: true
+        descricao: número do registro no conselho
+        origem: laudo de autovistoria (inspetora)
+        exemplo: "2008123456"
+      - nome: criterio_tecnico
+        tipo: enum
+        obrigatorio: true
+        descricao: base técnica usada (IN 113, art. 1º; lacuna L13)
+        dominio: [RIP, ABNT]
+        origem: laudo de autovistoria (inspetora)
+        exemplo: RIP
+      - nome: resultado
+        tipo: enum
+        obrigatorio: true
+        descricao: conclusão do laudo
+        dominio: [APROVADO, APROVADO_COM_RESTRICAO, REPROVADO]
+        origem: laudo de autovistoria (inspetora)
+        exemplo: APROVADO
+      - nome: prazo_adequacao
+        tipo: data
+        obrigatorio:
+          se: resultado
+          igual: APROVADO_COM_RESTRICAO
+        descricao: >
+          data-limite para corrigir as não conformidades (NBR 15923). É um prazo,
+          não um evento: pode ser posterior à data de referência.
+        origem: laudo de autovistoria (inspetora)
+        exemplo: "2026-12-09"
+      - nome: escapamento_gas
+        tipo: booleano
+        obrigatorio:
+          se: resultado
+          igual: REPROVADO
+        descricao: o laudo registrou escapamento de gás (interrupção imediata)
+        origem: laudo de autovistoria (inspetora)
+        exemplo: true
+      - nome: teste_monoxido_realizado
+        tipo: booleano
+        obrigatorio: true
+        descricao: o laudo registra teste de monóxido de carbono nos aparelhos (NBR 13103)
+        origem: laudo de autovistoria (inspetora)
+        exemplo: true
+      - nome: id_inspecao_origem
+        tipo: texto
+        obrigatorio: false
+        descricao: se for reinspeção, o laudo que originou a exigência
+        origem: registro de laudos da concessionária
+        exemplo: LAU-2021-000230
+      - nome: url_laudo
+        tipo: url
+        obrigatorio: false
+        descricao: link para o PDF do laudo, se disponível
+        origem: repositório de documentos da concessionária
+        exemplo: https://arquivos.concessionaria.example/laudos/LAU-2026-004512.pdf
+      - nome: hash_laudo_sha256
+        tipo: sha256
+        obrigatorio: false
+        descricao: hash SHA-256 do PDF do laudo, para garantir integridade
+        origem: repositório de documentos da concessionária
+        exemplo: 6ddafe5eb08d4abce804cc6327a07bd0d3f393994f65b3ddaa6d998aecbec5ec
+
+  - nome: interrupcoes
+    descricao: Uma linha por interrupção do fornecimento ligada à inspeção periódica de gás.
+    chave: [id_interrupcao]
+    campos:
+      - nome: id_interrupcao
+        tipo: texto
+        obrigatorio: true
+        descricao: número da ordem de serviço de interrupção
+        origem: ordens de serviço / sistema operacional da concessionária
+        exemplo: OS-2026-0098812
+      - nome: id_unidade
+        tipo: texto
+        obrigatorio: true
+        descricao: unidade em que o fornecimento foi interrompido
+        origem: ordens de serviço da concessionária
+        exemplo: "1000555001"
+        referencia: unidades.id_unidade
+      - nome: id_inspecao_origem
+        tipo: texto
+        obrigatorio:
+          se: motivo
+          diferente: NAO_REALIZACAO_INSPECAO
+        descricao: laudo que motivou a interrupção
+        origem: ordens de serviço da concessionária
+        exemplo: LAU-2026-004512
+      - nome: motivo
+        tipo: enum
+        obrigatorio: true
+        descricao: motivo da interrupção
+        dominio: [REPROVACAO, ADEQUACAO_NAO_REALIZADA, NAO_REALIZACAO_INSPECAO, RISCO_IMEDIATO, OUTRO]
+        origem: ordens de serviço da concessionária
+        exemplo: REPROVACAO
+      - nome: data_interrupcao
+        tipo: data
+        obrigatorio: true
+        descricao: data do corte efetivo
+        origem: ordens de serviço da concessionária
+        exemplo: "2026-08-21"
+        evento: true
+      - nome: data_religacao
+        tipo: data
+        obrigatorio: false
+        descricao: data em que o fornecimento voltou
+        origem: ordens de serviço da concessionária
+        exemplo: "2026-11-19"
+        evento: true
+      - nome: comunicado_bombeiros_defesa_civil
+        tipo: booleano
+        obrigatorio: false
+        descricao: houve comunicação ao Corpo de Bombeiros ou à Defesa Civil
+        origem: registro de ocorrências da concessionária
+        exemplo: true
+
+  - nome: inspetoras_credenciadas
+    descricao: >
+      Cadastro, com histórico, das pessoas físicas e jurídicas que a
+      concessionária credenciou ou credencia (IN 113, art. 2º, I). Organismos
+      acreditados pelo Inmetro não precisam constar: a AGENERSA consulta a lista
+      oficial da Cgcre diretamente.
+    chave: [documento_inspetora, data_inicio]
+    campos:
+      - nome: documento_inspetora
+        tipo: cpf_cnpj
+        obrigatorio: true
+        descricao: CNPJ (14) ou CPF (11) da inspetora credenciada
+        origem: cadastro de credenciamento da concessionária
+        exemplo: "44555666000181"
+      - nome: nome_inspetora
+        tipo: texto
+        obrigatorio: true
+        descricao: razão social ou nome
+        origem: cadastro de credenciamento da concessionária
+        exemplo: INSPETORA EXEMPLO ALFA LTDA.
+      - nome: tipo_pessoa
+        tipo: enum
+        obrigatorio: true
+        descricao: pessoa jurídica ou física
+        dominio: [PJ, PF]
+        origem: cadastro de credenciamento da concessionária
+        exemplo: PJ
+      - nome: responsavel_tecnico_conselho
+        tipo: enum
+        obrigatorio: true
+        descricao: conselho profissional do responsável técnico
+        dominio: [CREA, CAU, CRT]
+        origem: cadastro de credenciamento da concessionária
+        exemplo: CREA
+      - nome: responsavel_tecnico_registro
+        tipo: texto
+        obrigatorio: true
+        descricao: número do registro no conselho
+        origem: cadastro de credenciamento da concessionária
+        exemplo: "2008123456"
+      - nome: data_inicio
+        tipo: data
+        obrigatorio: true
+        descricao: início do credenciamento
+        origem: cadastro de credenciamento da concessionária
+        exemplo: "2016-01-15"
+        evento: true
+      - nome: data_fim
+        tipo: data
+        obrigatorio: false
+        descricao: fim, suspensão ou descredenciamento (vazio = vigente)
+        origem: cadastro de credenciamento da concessionária
+        exemplo: "2021-06-30"
+        evento: true
+      - nome: situacao
+        tipo: enum
+        obrigatorio: true
+        descricao: situação do credenciamento na data de referência
+        dominio: [ATIVO, SUSPENSO, DESCREDENCIADO]
+        origem: cadastro de credenciamento da concessionária
+        exemplo: ATIVO
+      - nome: motivo_fim
+        tipo: texto
+        obrigatorio: false
+        descricao: motivo do fim, da suspensão ou do descredenciamento
+        origem: cadastro de credenciamento da concessionária
+        exemplo: Descredenciamento a pedido da inspetora
+
+# Regras adicionais às automáticas (R01–R05, R07, R08).
+# R06 reúne as três verificações de ordem entre datas do layout 1.0; a quarta
+# (data_referencia_anterior < data_referencia) é do cabeçalho automático.
+# Na carga INCREMENTAL, A02 e A03 dependem do histórico já recebido: a AGENERSA
+# as confere contra a base acumulada, não o validador entregue ao regulado.
+regras:
+  - id: R06
+    tipo: ordem_datas
+    severidade: rejeicao
+    bloco: inspecoes
+    antes: data_inspecao
+    depois: data_recebimento_laudo
+    mensagem: "data_recebimento_laudo deve ser igual ou posterior a data_inspecao"
+  - id: R09
+    tipo: ordem_datas
+    severidade: rejeicao
+    bloco: interrupcoes
+    antes: data_interrupcao
+    depois: data_religacao
+    mensagem: "data_religacao deve ser igual ou posterior a data_interrupcao"
+  - id: R10
+    tipo: ordem_datas
+    severidade: rejeicao
+    bloco: inspetoras_credenciadas
+    antes: data_inicio
+    depois: data_fim
+    mensagem: "data_fim deve ser igual ou posterior a data_inicio"
+  - id: A01
+    tipo: data_minima
+    severidade: alerta
+    bloco: inspecoes
+    campo: data_inspecao
+    valor: "2015-03-21"
+    mensagem: "inspeção anterior à vigência da Lei 6.890/2014 (21/03/2015)"
+  - id: A02
+    tipo: expressao
+    severidade: alerta
+    bloco: inspecoes
+    condicao: "bool(r.get('numero_acreditacao_inmetro')) or any(c.get('documento_inspetora') == r['documento_inspetora'] for c in e['inspetoras_credenciadas'])"
+    mensagem: "inspeção por documento que não está em inspetoras_credenciadas nem informa numero_acreditacao_inmetro"
+  - id: A03
+    tipo: expressao
+    severidade: alerta
+    bloco: inspecoes
+    condicao: "r['resultado'] != 'REPROVADO' or any(i.get('id_inspecao_origem') == r['id_inspecao'] for i in e['interrupcoes'])"
+    mensagem: "laudo reprovado sem interrupção registrada"
+  - id: A04
+    tipo: expressao
+    severidade: alerta
+    bloco: unidades
+    condicao: "str(r['codigo_ibge_municipio']).startswith('33')"
+    mensagem: "codigo_ibge_municipio fora do Estado do Rio de Janeiro (não começa com 33)"

@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+# artefatos gerados localmente
+exemplos/*/gerado/
+saida/
+# dados baixados de fontes externas
+**/oia_inmetro.csv
+**/IN113_texto_consolidado.txt
+.env
+secrets.env
+~$*.xlsx

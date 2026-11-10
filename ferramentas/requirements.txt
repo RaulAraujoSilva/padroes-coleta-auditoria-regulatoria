@@ -1,0 +1,5 @@
+pyyaml>=6.0
+openpyxl>=3.1
+jsonschema>=4.18
+# opcional, só para os testes da especificação OpenAPI:
+openapi-spec-validator>=0.7

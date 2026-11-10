@@ -1,0 +1,337 @@
+# =============================================================================
+# MODELO COMENTADO DE CONTRATO DE COLETA
+# Exemplo genérico: prazo de atendimento a reclamações de usuários.
+#
+# Especificação do formato: docs/formato-contrato.md
+# Método: metodo/04-contrato-de-coleta.md
+#
+# Como usar: copie este arquivo para a pasta do seu teste, renomeie para
+# contrato.yaml e substitua o conteúdo. Normas, prazos, órgão e regulados
+# abaixo são FICTÍCIOS; servem só para ilustrar.
+#
+# Convenções (valem para todos os campos):
+#   - nomes de blocos e campos em snake_case, minúsculos, sem acento;
+#   - datas AAAA-MM-DD; data e hora ISO 8601 com fuso;
+#   - CNPJ, CPF, CEP e código IBGE só com dígitos;
+#   - valores de domínio em MAIÚSCULAS, sem acento, com sublinhado;
+#   - campo sem informação: omitido ou null (no Excel, célula vazia).
+# =============================================================================
+
+# --- Identificação -----------------------------------------------------------
+contrato: reclamacoes-prazo          # identificador permanente; não muda entre versões
+versao: "1.0"                        # MAIOR.MENOR, sempre entre aspas
+titulo: Prazo de atendimento a reclamações
+descricao: >
+  Coleta dos registros de reclamações de usuários e das respostas dadas pelo
+  regulado, para verificar automaticamente se cada reclamação foi respondida
+  dentro do prazo regulamentar.
+orgao: AGENCIA_EXEMPLO               # sigla da agência que define o padrão
+regulados: [PRESTADORA_A, PRESTADORA_B]   # vira o domínio do campo `remetente`
+
+# --- Base normativa ----------------------------------------------------------
+# Liste toda a cadeia levantada na Etapa 1, inclusive normas que alteram ou
+# conflitam com a principal. Os ids são livres, mas devem ser estáveis.
+base_normativa:
+  - id: RES-100-2023
+    descricao: >
+      Resolução fictícia nº 100/2023 — condições gerais de atendimento ao
+      usuário; art. 20 fixa o prazo de resposta a reclamações.
+  - id: RES-115-2025
+    descricao: >
+      Resolução fictícia nº 115/2025 — altera o art. 20 da Res. 100/2023 e
+      admite prorrogação do prazo em casos que exigem visita técnica.
+  - id: CONTRATO-CONCESSAO
+    descricao: >
+      Contrato de concessão — cláusula de manutenção de registros e de
+      prestação de informações à agência.
+
+# --- Teste de auditoria ------------------------------------------------------
+teste_auditoria:
+  pergunta: >
+    A reclamação R, registrada pelo usuário em qualquer canal de atendimento
+    do regulado, recebeu resposta final dentro do prazo regulamentar,
+    considerando a prorrogação quando admitida?
+  regra: |
+    PARA cada reclamação R com data_registro dentro do período verificado:
+      SE R.canal ou R.tipo estiver fora do escopo da norma [L5]
+        ENTÃO não se aplica.
+      prazo = PRAZO_DIAS (10) contados de R.data_registro conforme FORMA_CONTAGEM [L1, L2]
+      SE R.prorrogada = SIM e a prorrogação é admitida [L4]
+        ENTÃO data_limite = R.data_limite_prorrogada
+        SENÃO data_limite = data_registro + prazo
+      resposta_final = primeira resposta de R com tipo_resposta = FINAL
+      SE houver resposta PEDIDO_DE_INFORMACAO e SUSPENDE_PRAZO = SIM [L3]
+        ENTÃO data_limite é acrescida do tempo de espera
+      SE não há resposta_final
+        SE data_referencia > data_limite ENTÃO NÃO CONFORME
+        SENÃO pendente no prazo (sem veredito)
+      SENÃO SE resposta_final.data_resposta <= data_limite ENTÃO CONFORME
+      SENÃO NÃO CONFORME
+      SE faltar dado necessário ou houver incoerência ENTÃO PRECISA DE DELIBERAÇÃO
+  classificacao: computavel        # computavel | parcialmente_computavel | discricionaria
+  saidas: [CONFORME, NAO_CONFORME, PRECISA_DE_DELIBERACAO]
+  # Cada lacuna vira um parâmetro do verificador com o MESMO id.
+  # decisao_padrao = valor provisório usado até a deliberação.
+  lacunas:
+    - id: L1
+      trecho: "no prazo de 10 (dez) dias"
+      problema: >
+        Contagem de prazo: a norma não diz se os dias são corridos ou úteis,
+        nem qual calendário de feriados se aplica (nacional, estadual ou
+        municipal).
+      decisao_padrao: dias úteis, calendário nacional e estadual
+      quem_decide: Superintendência de Fiscalização
+    - id: L2
+      trecho: "contados da reclamação"
+      problema: >
+        Marco temporal: o prazo conta do registro no canal ou do primeiro dia
+        útil seguinte? Registros feitos fora do horário de atendimento contam
+        a partir de quando?
+      decisao_padrao: conta a partir do dia seguinte ao registro
+      quem_decide: Superintendência de Fiscalização
+    - id: L3
+      trecho: "resposta ao usuário"
+      problema: >
+        Termo indefinido: um pedido de informação complementar ao usuário
+        suspende o prazo? Uma resposta parcial cumpre a obrigação?
+      decisao_padrao: não suspende; só a resposta FINAL cumpre a obrigação
+      quem_decide: Diretoria Colegiada
+    - id: L4
+      trecho: "poderá ser prorrogado, mediante justificativa"
+      problema: >
+        Consequência discricionária: a Res. 115/2025 admite prorrogação, mas
+        não diz por quanto tempo nem quem a aprova; a agência não recebe a
+        justificativa.
+      decisao_padrao: aceita a prorrogação informada, limitada a 10 dias adicionais
+      quem_decide: Diretoria Colegiada
+    - id: L5
+      trecho: "reclamações dos usuários"
+      problema: >
+        Escopo: reclamações recebidas pela ouvidoria (segunda instância) e
+        pedidos de informação seguem o mesmo prazo?
+      decisao_padrao: ouvidoria fora do escopo deste teste; pedidos de informação fora
+      quem_decide: Diretoria Colegiada
+    - id: L6
+      trecho: "dias úteis"
+      problema: >
+        Dado inexistente: não há, na agência, calendário consolidado de
+        feriados municipais da área de concessão.
+      decisao_padrao: considera só feriados nacionais e estaduais
+      quem_decide: Superintendência de Fiscalização (montar o calendário)
+
+# --- Periodicidade -----------------------------------------------------------
+periodicidade:
+  carga_inicial: "histórico desde 2024-01-01"
+  regular: mensal                  # diaria | semanal | mensal | trimestral | anual | sob_demanda
+  prazo_entrega: "até o dia 10 do mês seguinte"
+
+# --- Cabeçalho ---------------------------------------------------------------
+# NÃO repetir aqui os campos automáticos (contrato, versao_layout, remetente,
+# cnpj_remetente, data_referencia, tipo_carga, data_referencia_anterior,
+# gerado_em, totais). Só o que for específico deste contrato.
+cabecalho:
+  - nome: responsavel_envio_nome
+    tipo: texto
+    obrigatorio: true
+    descricao: Nome do responsável técnico pelo envio, indicado ao órgão.
+    origem: indicação formal do regulado
+    exemplo: Maria da Silva
+    tamanho_max: 120
+  - nome: responsavel_envio_email
+    tipo: texto
+    obrigatorio: true
+    descricao: E-mail institucional do responsável técnico pelo envio.
+    origem: indicação formal do regulado
+    exemplo: responsavel.envio@prestadora-a.exemplo
+    formato: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+    tamanho_max: 120
+
+# --- Blocos ------------------------------------------------------------------
+blocos:
+  - nome: reclamacoes
+    descricao: >
+      Uma linha por reclamação registrada pelo usuário em qualquer canal,
+      de qualquer tipo e situação. O regulado NÃO filtra o escopo: quem
+      aplica o escopo é a agência (lacuna L5).
+    chave: [id_reclamacao]
+    campos:
+      - nome: id_reclamacao
+        tipo: texto
+        obrigatorio: true
+        descricao: Número de protocolo da reclamação. Deve ser estável entre envios.
+        origem: sistema de atendimento do regulado
+        exemplo: "2026000123456"
+        tamanho_max: 30
+      - nome: id_unidade
+        tipo: texto
+        obrigatorio: false
+        descricao: >
+          Código da unidade consumidora ou do contrato a que a reclamação se
+          refere, quando houver. Não informar nome nem CPF do usuário
+          (minimização de dados pessoais).
+        origem: cadastro comercial do regulado
+        exemplo: "0001234567"
+        tamanho_max: 30
+      - nome: codigo_ibge_municipio
+        tipo: ibge_municipio
+        obrigatorio: true
+        descricao: Município da unidade ou, se não houver unidade, do registro. Usado para feriados municipais (L6).
+        origem: cadastro comercial do regulado
+        exemplo: "3304557"
+      - nome: canal
+        tipo: enum
+        obrigatorio: true
+        descricao: Canal em que a reclamação foi registrada.
+        origem: sistema de atendimento do regulado
+        dominio: [TELEFONE, ATENDIMENTO_PRESENCIAL, INTERNET, APLICATIVO, OUVIDORIA, OUTRO]
+        exemplo: TELEFONE
+      - nome: tipo
+        tipo: enum
+        obrigatorio: true
+        descricao: Assunto principal da reclamação.
+        origem: sistema de atendimento do regulado
+        dominio: [FATURAMENTO, QUALIDADE_DO_SERVICO, INTERRUPCAO, LIGACAO_NOVA, ATENDIMENTO, PEDIDO_DE_INFORMACAO, OUTRO]
+        exemplo: FATURAMENTO
+      - nome: descricao_tipo_outro
+        tipo: texto
+        obrigatorio:                 # obrigatoriedade condicional (regra R05)
+          se: tipo
+          igual: OUTRO
+        descricao: Assunto, em poucas palavras, quando tipo = OUTRO.
+        origem: sistema de atendimento do regulado
+        exemplo: "cobrança de serviço não solicitado"
+        tamanho_max: 200
+      - nome: data_registro
+        tipo: data
+        obrigatorio: true
+        evento: true                 # fato já ocorrido: não pode passar da data_referencia (R04)
+        descricao: Data em que a reclamação foi registrada.
+        origem: sistema de atendimento do regulado
+        exemplo: "2026-10-03"
+      - nome: situacao
+        tipo: enum
+        obrigatorio: true
+        descricao: Situação da reclamação na data_referencia.
+        origem: sistema de atendimento do regulado
+        dominio: [ABERTA, RESPONDIDA, CANCELADA_PELO_USUARIO]
+        exemplo: RESPONDIDA
+      - nome: prorrogada
+        tipo: booleano
+        obrigatorio: true
+        descricao: Indica se o regulado prorrogou o prazo de resposta (L4).
+        origem: sistema de atendimento do regulado
+        exemplo: false
+      - nome: data_limite_prorrogada
+        tipo: data
+        obrigatorio:
+          se: prorrogada
+          igual: true
+        # Prazo futuro: NÃO leva evento: true.
+        descricao: Nova data-limite de resposta, quando houve prorrogação.
+        origem: sistema de atendimento do regulado
+        exemplo: "2026-10-27"
+      - nome: motivo_prorrogacao
+        tipo: enum
+        obrigatorio:
+          se: prorrogada
+          igual: true
+        descricao: Motivo da prorrogação.
+        origem: sistema de atendimento do regulado
+        dominio: [VISITA_TECNICA, ANALISE_DE_TERCEIRO, OUTRO]
+        exemplo: VISITA_TECNICA
+
+  - nome: respostas
+    descricao: >
+      Uma linha por resposta dada ao usuário, parcial ou final. Uma
+      reclamação pode ter várias respostas.
+    chave: [id_resposta]
+    campos:
+      - nome: id_resposta
+        tipo: texto
+        obrigatorio: true
+        descricao: Identificador da resposta no sistema do regulado.
+        origem: sistema de atendimento do regulado
+        exemplo: "R-2026-0000987"
+        tamanho_max: 30
+      - nome: id_reclamacao
+        tipo: texto
+        obrigatorio: true
+        descricao: Reclamação a que a resposta se refere.
+        origem: sistema de atendimento do regulado
+        referencia: reclamacoes.id_reclamacao   # integridade referencial (R03, carga COMPLETA)
+        exemplo: "2026000123456"
+        tamanho_max: 30
+      - nome: data_resposta
+        tipo: data
+        obrigatorio: true
+        evento: true
+        descricao: Data em que a resposta foi enviada ou comunicada ao usuário.
+        origem: sistema de atendimento do regulado
+        exemplo: "2026-10-14"
+      - nome: tipo_resposta
+        tipo: enum
+        obrigatorio: true
+        descricao: >
+          FINAL encerra a reclamação; PARCIAL informa andamento;
+          PEDIDO_DE_INFORMACAO solicita dado ao usuário (L3).
+        origem: sistema de atendimento do regulado
+        dominio: [FINAL, PARCIAL, PEDIDO_DE_INFORMACAO]
+        exemplo: FINAL
+      - nome: meio_resposta
+        tipo: enum
+        obrigatorio: true
+        descricao: Meio pelo qual a resposta chegou ao usuário.
+        origem: sistema de atendimento do regulado
+        dominio: [TELEFONE, EMAIL, CARTA, APLICATIVO, PRESENCIAL, OUTRO]
+        exemplo: EMAIL
+      - nome: resultado
+        tipo: enum
+        obrigatorio:
+          se: tipo_resposta
+          igual: FINAL
+        descricao: Conclusão do regulado sobre a reclamação, na resposta final.
+        origem: sistema de atendimento do regulado
+        dominio: [PROCEDENTE, PARCIALMENTE_PROCEDENTE, IMPROCEDENTE]
+        exemplo: PROCEDENTE
+
+# --- Regras adicionais -------------------------------------------------------
+# Automáticas (não escrever): R01, R02, R03, R04, R05, R07, R08.
+# Livres: R06 e R09 em diante (rejeição); A01 em diante (alerta).
+regras:
+  - id: R06
+    tipo: expressao
+    severidade: rejeicao
+    bloco: respostas
+    # Datas ISO (AAAA-MM-DD) podem ser comparadas como texto.
+    # Se a reclamação não estiver no envio (carga INCREMENTAL), a regra não
+    # se aplica aqui e é conferida pela agência contra a base acumulada.
+    condicao: "all(c['data_registro'] <= r['data_resposta'] for c in e['reclamacoes'] if c['id_reclamacao'] == r['id_reclamacao'])"
+    mensagem: "data_resposta anterior à data_registro da reclamação"
+  - id: R09
+    tipo: ordem_datas
+    severidade: rejeicao
+    bloco: reclamacoes
+    antes: data_registro
+    depois: data_limite_prorrogada
+    mensagem: "data_limite_prorrogada deve ser igual ou posterior a data_registro"
+  - id: A01
+    tipo: data_minima
+    severidade: alerta
+    bloco: reclamacoes
+    campo: data_registro
+    valor: "2024-01-01"
+    mensagem: "reclamação anterior ao início do histórico exigido; não será usada no teste"
+  - id: A02
+    tipo: expressao
+    severidade: alerta
+    bloco: reclamacoes
+    # Na carga INCREMENTAL a resposta final pode ter vindo em envio anterior;
+    # a agência confere contra a base acumulada.
+    condicao: "r['situacao'] != 'RESPONDIDA' or any(x['id_reclamacao'] == r['id_reclamacao'] and x['tipo_resposta'] == 'FINAL' for x in e['respostas'])"
+    mensagem: "reclamação com situacao RESPONDIDA sem resposta FINAL no bloco respostas"
+  - id: A03
+    tipo: expressao
+    severidade: alerta
+    bloco: reclamacoes
+    condicao: "r.get('canal') != 'OUVIDORIA' or r.get('tipo') != 'PEDIDO_DE_INFORMACAO'"
+    mensagem: "pedido de informação registrado como reclamação de ouvidoria; confirme a classificação (L5)"

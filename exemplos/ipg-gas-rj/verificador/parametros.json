@@ -1,0 +1,50 @@
+{
+  "_leia_me": "Cada chave marcada com 'lacuna' é uma DECISÃO que a norma não toma. O valor abaixo é o padrão provisório; a AGENERSA deve confirmar ou trocar. O verificador cita, em cada veredito, quais lacunas influenciaram o resultado.",
+
+  "periodicidade_anos": 5,
+  "contagem_prazo": "aniversario",
+  "_contagem_prazo": "lacuna L4 — 'aniversario' = mesma data 5 anos depois (29/02 -> 28/02); a lei só diz 'quinquenal'",
+
+  "inicio_vigencia_lei": "2015-03-21",
+  "_inicio_vigencia_lei": "Lei 6.890/2014, art. 5º: 180 dias após a publicação (DOERJ 22/09/2014)",
+
+  "inicio_regime_in113": "2024-01-16",
+  "_inicio_regime_in113": "publicação da IN 113/2024 no DOERJ (16/01/2024); antes disso vale o regime da IN 47/2015",
+
+  "habilitacao_aceita_antes_in113": ["OIA_INMETRO"],
+  "_habilitacao_aceita_antes_in113": "lacuna L2 — de 21/03/2015 a 31/05/2015 só havia a IN 47/2015 ('órgãos competentes conveniados', sem nomear o órgão); a partir da IN 48/2015 (DOERJ 01/06/2015), arts. 2º e 3º: OIA acreditado pelo Inmetro + CREA/CAU",
+
+  "habilitacao_aceita_desde_in113": ["CREDENCIADA_CEG", "CREDENCIADA_CEG_RIO", "OIA_INMETRO"],
+  "_habilitacao_aceita_desde_in113": "IN 113/2024, art. 2º, I e IV: credenciamento pelas concessionárias; OIA acreditado pelo Inmetro fica dispensado de novo credenciamento",
+
+  "oia_inmetro_apos_in113": "todos",
+  "_oia_inmetro_apos_in113": "lacuna L1 — 'todos': a IN 48/2015 (Inmetro como acreditador) não foi revogada e a Cgcre segue acreditando com escopo que cita a IN 113 (61 dos 91 OIA-IG são posteriores a 16/01/2024); 'so_legado': leitura literal do art. 2º, IV da IN 113 (só quem 'estava acreditado')",
+
+  "credenciamento_vale_para_outra_concessionaria": false,
+  "_credenciamento_vale_para_outra_concessionaria": "lacuna L3 — credenciada pela CEG pode inspecionar unidade da CEG RIO?",
+
+  "exigir_registro_profissional": true,
+  "_exigir_registro_profissional": "IN 113/2024, art. 2º, IV: CREA-RJ, CAU-RJ ou CRT em dia",
+
+  "cronograma_prevalece": "tabela",
+  "_cronograma_prevalece": "lacuna L6 — 'tabela' (Anexo republicado) ou 'regra' (texto do art. 1º das IN 136 e 149); divergem em 49 localidades",
+
+  "prazo_primeira_sem_cronograma": "2026-03-22",
+  "_prazo_primeira_sem_cronograma": "IN 113/2024, art. 8º: 5 anos contados do TAC (até 22/03/2026) quando a localidade não está no Anexo I",
+
+  "vistoria_previa_inicia_contagem": true,
+  "_vistoria_previa_inicia_contagem": "lacuna L5 — a IN 47/2015 dizia que a vistoria prévia era o 'termo inicial'; a IN 113/2024 não diz",
+
+  "resultados_que_contam_como_inspecao": ["APROVADO", "APROVADO_COM_RESTRICAO", "REPROVADO"],
+  "_resultados_que_contam_como_inspecao": "lacuna L7 — a obrigação é realizar a inspeção; o resultado gera outras obrigações (adequação ou interrupção)",
+
+  "interrupcao_obrigatoria_apos_reprovacao": true,
+  "_interrupcao_obrigatoria_apos_reprovacao": "lacuna L8 — a lei (art. 4º) manda interromper 'imediatamente'; a IN 113 (art. 7º) manda 'avaliar a necessidade'",
+
+  "prazo_interrupcao_dias_uteis": 15,
+  "_prazo_interrupcao_dias_uteis": "IN 48/2015, Regulamento, item 4.1.20: até 15 dias úteis do recebimento do laudo de não conformidade; escapamento de gás = imediato (item 4.1.19, coluna 'escapamento'). Dias úteis sem feriados; a data de recebimento do laudo pela concessionária não está nos dados mínimos (lacuna L11)",
+
+  "classes_no_escopo": ["RESIDENCIAL", "COMERCIAL"],
+  "incluir_unidades_sem_fornecimento": false,
+  "_incluir_unidades_sem_fornecimento": "lacuna L9 — unidade com fornecimento suspenso ou desligado continua obrigada?"
+}

@@ -1,0 +1,14 @@
+id_unidade,concessionaria,municipio,bairro,classe,situacao_fornecimento,data_vistoria_previa
+U01,CEG,Rio de Janeiro,Copacabana,Residencial,Ativo,
+U02,CEG,Rio de Janeiro,Madureira,Residencial,Ativo,
+U03,CEG,Rio de Janeiro,Tijuca,Comercial,Ativo,
+U04,CEG,Rio de Janeiro,Botafogo,Residencial,Ativo,
+U05,CEG,Rio de Janeiro,Leblon,Residencial,Ativo,
+U06,CEG,Niterói,,Residencial,Ativo,
+U07,CEG RIO,Petrópolis,,Residencial,Ativo,
+U08,CEG,Rio de Janeiro,Centro,Industrial,Ativo,
+U09,CEG,Rio de Janeiro,Barra da Tijuca,Residencial,Ativo,2024-08-01
+U10,CEG RIO,Macaé,,Residencial,Ativo,
+U11,CEG,Rio de Janeiro,Ipanema,Residencial,Ativo,
+U12,CEG,Rio de Janeiro,Flamengo,Comercial,Ativo,
+U13,CEG,Rio de Janeiro,Grajaú,Residencial,Desligado,

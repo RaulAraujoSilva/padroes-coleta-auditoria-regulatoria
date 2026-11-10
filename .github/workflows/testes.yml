@@ -1,0 +1,16 @@
+name: testes
+on: [push, pull_request]
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r ferramentas/requirements.txt pytest
+      - run: python -m pytest -q
+      - name: Gera os padrões do exemplo e valida os envios
+        run: |
+          python ferramentas/gerar_padrao.py exemplos/ipg-gas-rj/contrato.yaml --saida /tmp/gerado
+          python ferramentas/validar_envio.py exemplos/ipg-gas-rj/contrato.yaml exemplos/ipg-gas-rj/envios/exemplo_envio_completo.json

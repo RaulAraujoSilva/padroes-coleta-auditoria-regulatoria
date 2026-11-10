@@ -1,0 +1,14 @@
+﻿id_unidade;status;data_limite;dias_atraso;ultima_inspecao_valida;obrigacao_concessionaria;inspecoes_desconsideradas;lacunas_acionadas;justificativa
+U01;EM_DIA;2028-05-10;;I01 (10/05/2023, APROVADO);OK;;L2,L4;prazo contado da inspeção mais recente (IN 113, art. 8º)
+U02;PRIMEIRA_NAO_REALIZADA;2026-03-22;233;;OK;;L6;1ª inspeção: cronograma Anexo IN 136/2025 (Madureira)
+U03;VENCIDA;2024-06-01;892;I02 (01/06/2019, APROVADO);OK;;L2,L4;prazo contado da inspeção mais recente (IN 113, art. 8º)
+U04;EM_DIA;2030-02-10;;I03 (10/02/2025, APROVADO);OK;;L4;prazo contado da inspeção mais recente (IN 113, art. 8º)
+U05;PRIMEIRA_NAO_REALIZADA;2026-09-23;48;;OK;I04: inspetora sem nenhuma habilitação cadastrada;;1ª inspeção: cronograma Anexo IN 136/2025 (Leblon)
+U06;REPROVADA;2031-01-15;;I05 (15/01/2026, REPROVADO);NAO_INTERROMPEU;;L11,L4,L8;prazo contado da inspeção mais recente (IN 113, art. 8º) | sem interrupção do fornecimento no prazo (Lei 6.890, art. 4º)
+U07;ADEQUACAO_VENCIDA;2031-02-01;;I06 (01/02/2026, APROVADO_COM_RESTRICAO);NAO_INTERROMPEU;;L11,L4,L8;prazo contado da inspeção mais recente (IN 113, art. 8º) | prazo de adequação (NBR 15923) venceu em 01/04/2026 sem nova inspeção | sem interrupção do fornecimento no prazo (Lei 6.890, art. 4º)
+U08;FORA_DO_ESCOPO;;;;OK;;;classe 'Industrial' não é residencial/comercial
+U09;PRIMEIRA_PENDENTE_NO_PRAZO;2029-08-01;;;OK;;L5;prazo contado da vistoria prévia da concessionária (IN 113, art. 4º)
+U10;PRIMEIRA_NAO_REALIZADA;2026-09-23;48;;OK;I07: regime IN 113/2024: sem credenciamento da concessionária nem OIA aceito vigente na data;L3;1ª inspeção: cronograma Anexo IN 149/2026 (MACAÉ)
+U11;EM_DIA;2029-05-01;;I08 (01/05/2024, APROVADO);OK;;L1,L10,L4;prazo contado da inspeção mais recente (IN 113, art. 8º)
+U12;PRIMEIRA_NAO_REALIZADA;2026-09-23;48;;OK;I09: sem registro CREA/CAU/CRT informado;;1ª inspeção: cronograma Anexo IN 136/2025 (Flamengo)
+U13;FORA_DO_ESCOPO;;;;OK;;L9;sem fornecimento ativo

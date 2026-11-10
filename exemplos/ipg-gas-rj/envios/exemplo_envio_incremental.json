@@ -1,0 +1,102 @@
+{
+  "envio": {
+    "contrato": "ipg-envio",
+    "versao_layout": "1.0",
+    "remetente": "CEG",
+    "cnpj_remetente": "11222333000181",
+    "data_referencia": "2026-11-30",
+    "tipo_carga": "INCREMENTAL",
+    "data_referencia_anterior": "2026-10-31",
+    "gerado_em": "2026-12-04T10:15:00-03:00",
+    "responsavel_envio": "Fulana Exemplo <fulana@concessionaria.example>",
+    "totais": {
+      "unidades": 2,
+      "inspecoes": 2,
+      "interrupcoes": 2,
+      "inspetoras_credenciadas": 0
+    }
+  },
+  "unidades": [
+    {
+      "id_unidade": "1000876540",
+      "classe": "RESIDENCIAL",
+      "situacao_fornecimento": "SUSPENSO",
+      "data_situacao": "2026-11-25",
+      "logradouro": "Rua Moreira César",
+      "numero": "200",
+      "complemento": "Apto 1102",
+      "bairro": "Icaraí",
+      "municipio": "Niterói",
+      "codigo_ibge_municipio": "3303302",
+      "cep": "24230052",
+      "id_edificacao": "ED-0078810",
+      "data_inicio_fornecimento": "2010-09-01"
+    },
+    {
+      "id_unidade": "1000555001",
+      "classe": "RESIDENCIAL",
+      "situacao_fornecimento": "ATIVO",
+      "data_situacao": "2026-11-19",
+      "logradouro": "Rua Doutor Alfredo Backer",
+      "numero": "1200",
+      "complemento": "Casa 2",
+      "bairro": "Alcântara",
+      "municipio": "São Gonçalo",
+      "codigo_ibge_municipio": "3304904",
+      "cep": "24452001",
+      "data_inicio_fornecimento": "2016-02-18",
+      "data_vistoria_previa": "2016-02-11"
+    }
+  ],
+  "inspecoes": [
+    {
+      "id_inspecao": "LAU-2026-006033",
+      "id_unidade": "1000234568",
+      "data_inspecao": "2026-11-12",
+      "data_recebimento_laudo": "2026-11-13",
+      "documento_inspetora": "44555666000181",
+      "nome_inspetora": "INSPETORA EXEMPLO ALFA LTDA.",
+      "responsavel_tecnico_nome": "Carlos Exemplo Moreira",
+      "responsavel_tecnico_conselho": "CREA",
+      "responsavel_tecnico_registro": "2008123456",
+      "criterio_tecnico": "RIP",
+      "resultado": "APROVADO",
+      "teste_monoxido_realizado": true
+    },
+    {
+      "id_inspecao": "LAU-2026-006210",
+      "id_unidade": "1000555001",
+      "data_inspecao": "2026-11-18",
+      "data_recebimento_laudo": "2026-11-18",
+      "documento_inspetora": "90123456000131",
+      "nome_inspetora": "INSPETORA EXEMPLO GAMA LTDA.",
+      "numero_acreditacao_inmetro": "OIA-IG-9001",
+      "responsavel_tecnico_nome": "Roberto Exemplo Lima",
+      "responsavel_tecnico_conselho": "CREA",
+      "responsavel_tecnico_registro": "2015456789",
+      "criterio_tecnico": "RIP",
+      "resultado": "APROVADO",
+      "teste_monoxido_realizado": true,
+      "id_inspecao_origem": "LAU-2026-004512"
+    }
+  ],
+  "interrupcoes": [
+    {
+      "id_interrupcao": "OS-2026-0098812",
+      "id_unidade": "1000555001",
+      "id_inspecao_origem": "LAU-2026-004512",
+      "motivo": "REPROVACAO",
+      "data_interrupcao": "2026-08-21",
+      "data_religacao": "2026-11-19",
+      "comunicado_bombeiros_defesa_civil": true
+    },
+    {
+      "id_interrupcao": "OS-2026-0110934",
+      "id_unidade": "1000876540",
+      "motivo": "NAO_REALIZACAO_INSPECAO",
+      "data_interrupcao": "2026-11-25",
+      "comunicado_bombeiros_defesa_civil": false
+    }
+  ],
+  "inspetoras_credenciadas": []
+}
